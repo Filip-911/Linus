@@ -1,1 +1,0 @@
-cmd_/home/filip/linus/fifo/fifo.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 --build-id=sha1  -T ./scripts/module-common.lds -o /home/filip/linus/fifo/fifo.ko /home/filip/linus/fifo/fifo.o /home/filip/linus/fifo/fifo.mod.o;  true
