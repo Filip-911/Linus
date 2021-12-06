@@ -24,7 +24,9 @@ struct mutex  mut;
 
 unsigned char fifo[16];
 unsigned char write_pos = 0;
-int i = 0, num = 1, endRead = 0;
+int num = 1; //number of iterations for read fucntion
+int i = 0;   //runtime iterations for read function
+int endRead = 0;
 unsigned char read_pos = 0;
 unsigned char writeable_amount = 16;
 unsigned char readable_amount = 0;
@@ -74,7 +76,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	    i=0;
 	    return 0;
 	  }
-	
+	//mutex lock
 	if(mutex_lock_interruptible(&mut))
 	  return -ERESTARTSYS;
 	while (readable_amount == 0)
@@ -85,6 +87,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	    if(mutex_lock_interruptible(&mut))
 	      return -ERESTARTSYS;
 	  }
+	//read while readable_amount > 0
 	if(readable_amount > 0)
 	  {
 	    len = scnprintf(buff, BUFF_SIZE, "vrednost %d na poziciji %d\n", fifo[read_pos], read_pos); // ????
@@ -113,7 +116,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	  }
 	
 	mutex_unlock(&mut);
-	    
+	//if all num positions are read terminate
 	if(i == num)
 	  {
 	    wake_up_interruptible(&writeQ);
@@ -127,7 +130,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset) 
 {
 	char buff[100];
-	char *mesto;
+	char *jump;
 	unsigned char partial,decimal;
 	int i,j;
 	int ret;
@@ -139,10 +142,11 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 	buff[length-1] = '\0';
 	
 	
-	mesto = strchr(buff, 'b');
-	if(mesto)
+	jump = strchr(buff, 'b'); //jump to 'b'
+	if(jump != NULL) // if 'b' is found 
 	  {
-	    mesto++;
+	    jump++;
+	    //mutex lock
 	    if(mutex_lock_interruptible(&mut))
 	      return -ERESTARTSYS;
 	    while(writeable_amount == 0)
@@ -153,16 +157,17 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 		if(mutex_lock_interruptible(&mut))
 		  return -ERESTARTSYS;
 	      }
+	    // write until writeable_amount > 0
 	    while(writeable_amount > 0)
 	      {
 		decimal = 0;
 		if(write_pos == 16)
 		  write_pos = 0;
 	  
-		ret = sscanf(mesto,"%ld",&tmp);
+		ret = sscanf(jump,"%ld",&tmp);
 		if(ret==1) //one parameter parsed in sscanf
 		  {
-		    //konvrezija binarnog u decimalni
+		    //binary conversion to decimal without pow() function
 		    if(tmp%10 == 1)
 		      decimal++;
 		    tmp = tmp/10;
@@ -180,7 +185,8 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 			  }
 			tmp = tmp/10;
 		      }
-		    fifo[write_pos] = decimal;
+		    
+		    fifo[write_pos] = decimal; //write in the calculated value
 		    printk(KERN_INFO "Upisana izracunata decimalna vrednost %d u fifo na poziciji %d", fifo[write_pos], write_pos);
 		    write_pos++;
 		    writeable_amount--;
@@ -195,24 +201,24 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 		  {
 		    printk(KERN_WARNING "Fifo is full");
 		  }
-		//sledeci broj
-		mesto += 8;
-		if(*(mesto)== ';')
-		  mesto += 3;
+		// if possible, jump to next number
+		jump += 8;
+		if(*(jump)== ';')
+		  jump += 3;
 		else
 		  break;
 	      }
 	    wake_up_interruptible(&readQ);
 	    mutex_unlock(&mut);
 	  }
-	else
+	else   //if 'b' is not found
 	  {
-	    mesto = strchr(buff, 'n');
+	    jump = strchr(buff, 'n');  // jump to n
 	
-	    if(mesto)
+	    if(jump != NULL)
 	      {
-		mesto += 4; 
-		ret = sscanf(mesto,"%d",&num);
+		jump += 4; 
+		ret = sscanf(jump,"%d",&num); //change num
 		printk(KERN_INFO "successfully written value n=%d", num);
 		i=0;
 	      }
@@ -234,6 +240,7 @@ static int __init fifo_init(void)
 	for (i=0; i<16; i++)
 		fifo[i] = 0;
 	
+	//mutex and wait queues initalized
 	init_waitqueue_head(&writeQ);
 	init_waitqueue_head(&readQ);
         mutex_init(&mut);

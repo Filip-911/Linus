@@ -1,3 +1,15 @@
 implant_driver.sh
 implant_driver.sh~
-linus
+fifo/.Module.symvers.cmd
+fifo/.fifo.ko.cmd
+fifo/.fifo.mod.cmd
+fifo/.fifo.mod.o.cmd
+fifo/.fifo.o.cmd
+fifo/.modules.order.cmd
+fifo/Module.symvers
+fifo/fifo.ko
+fifo/fifo.mod
+fifo/fifo.mod.c
+fifo/fifo.mod.o
+fifo/fifo.o
+fifo/modules.order
