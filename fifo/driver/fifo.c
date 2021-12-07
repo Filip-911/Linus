@@ -90,8 +90,8 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	//read while readable_amount > 0
 	if(readable_amount > 0)
 	  {
-	    len = scnprintf(buff, BUFF_SIZE, "vrednost %d na poziciji %d\n", fifo[read_pos], read_pos); // ????
-	    printk(KERN_INFO "vrednost %d na poziciji %d\n", fifo[read_pos], read_pos);
+	    len = scnprintf(buff, BUFF_SIZE, "Value %d at position  %d\n", fifo[read_pos], read_pos);
+	    printk(KERN_INFO "Value %d at position %d\n", fifo[read_pos], read_pos);
 		
 	    ret = copy_to_user(buffer, buff, len);
 	    if(ret)
@@ -187,7 +187,7 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 		      }
 		    
 		    fifo[write_pos] = decimal; //write in the calculated value
-		    printk(KERN_INFO "Upisana izracunata decimalna vrednost %d u fifo na poziciji %d", fifo[write_pos], write_pos);
+		    printk(KERN_INFO "Successfully wrote value %d", fifo[write_pos], write_pos);
 		    write_pos++;
 		    writeable_amount--;
 		    readable_amount++;
@@ -219,7 +219,7 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 	      {
 		jump += 4; 
 		ret = sscanf(jump,"%d",&num); //change num
-		printk(KERN_INFO "successfully written value n=%d", num);
+		printk(KERN_INFO "Successfully written value n=%d", num);
 		i=0;
 	      }
 	    else
