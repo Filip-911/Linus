@@ -69,6 +69,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
         int ret;
         char buff[BUFF_SIZE];
         long int len = 0;
+	const char* nl = ";";
 	
 	if(endRead)
 	  {
@@ -121,6 +122,8 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	  {
 	    wake_up_interruptible(&writeQ);
 	    endRead = 1;
+	    copy_to_user(buffer, nl, 1);
+	    printk(KERN_INFO ";");
 	  }
 	    
 	return len;
@@ -187,7 +190,7 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 		      }
 		    
 		    fifo[write_pos] = decimal; //write in the calculated value
-		    printk(KERN_INFO "Successfully wrote value %d", fifo[write_pos], write_pos);
+		    printk(KERN_INFO "Successfully wrote value %d at position %d", fifo[write_pos], write_pos);
 		    write_pos++;
 		    writeable_amount--;
 		    readable_amount++;
@@ -213,7 +216,7 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 	  }
 	else   //if 'b' is not found
 	  {
-	    jump = strchr(buff, 'n');  // jump to n
+	    jump = strchr(buff, 'n');  // jump to 'n'
 	
 	    if(jump != NULL)
 	      {
