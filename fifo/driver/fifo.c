@@ -69,7 +69,6 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
         int ret;
         char buff[BUFF_SIZE];
         long int len = 0;
-	const char* nl = ";";
 	
 	if(endRead)
 	  {
@@ -91,6 +90,9 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	//read while readable_amount > 0
 	if(readable_amount > 0)
 	  {
+	   if(i == num-1)
+	   len = scnprintf(buff, BUFF_SIZE, "Value %d at position  %d;", fifo[read_pos], read_pos);
+	   else
 	    len = scnprintf(buff, BUFF_SIZE, "Value %d at position  %d\n", fifo[read_pos], read_pos);
 	    printk(KERN_INFO "Value %d at position %d\n", fifo[read_pos], read_pos);
 		
@@ -122,7 +124,6 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	  {
 	    wake_up_interruptible(&writeQ);
 	    endRead = 1;
-	    copy_to_user(buffer, nl, 1);
 	    printk(KERN_INFO ";");
 	  }
 	    
