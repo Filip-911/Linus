@@ -11,6 +11,7 @@
 #include <linux/device.h>
 #include <linux/wait.h>
 #include <linux/mutex.h>
+#include <linux/slab.h>
   
 #define BUFF_SIZE 30
 MODULE_LICENSE("Dual BSD/GPL");
@@ -129,17 +130,23 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 
 ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset) 
 {
-	char buff[100];
+        char* buff;
 	char *jump;
 	unsigned char partial,decimal;
 	int i,j;
 	int ret;
 	long tmp;
 	
+	buff = (char*) kmalloc(length * sizeof(char), GFP_KERNEL);
+	if(!buff)
+	  return -EFAULT;
+	
 	ret = copy_from_user(buff, buffer, length);
 	if(ret)
 		return -EFAULT;
 	buff[length-1] = '\0';
+
+	
 	
 	
 	jump = strchr(buff, 'b'); //jump to 'b'
@@ -225,7 +232,7 @@ ssize_t fifo_write(struct file *pfile, const char __user *buffer, size_t length,
 	    else
 	  printk(KERN_WARNING "Wrong command format");
 	  }
-
+	kfree(buff);
 	return length;
 	  
 	  

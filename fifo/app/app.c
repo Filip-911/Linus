@@ -9,10 +9,7 @@ int main(void)
   state_t state = MENU;
   FILE *fw, *fr;
   char* str;
-  unsigned char i=0;
   size_t num_of_bytes;
-  int read_size = 1;
-  char c;
   
 
   while(1)
@@ -31,13 +28,13 @@ int main(void)
       case WRITE:
 	puts("How many bytes do you want to write down ?");
 	scanf("%zu",&num_of_bytes);
-	num_of_bytes = num_of_bytes * 11;
+	num_of_bytes = num_of_bytes * 12;
 	
-	str = (char*) malloc(num_of_bytes * sizeof(char));
+	str = (char*) malloc(num_of_bytes);
 	str[num_of_bytes - 1] = '\0';
 	puts("Here: ");
 	scanf("%s", str); //getline propadne ?
-	  printf("%s", str);
+	//printf("%s", str);
 	
 	fw = fopen("/dev/fifo", "w");
 	if(fw == NULL)
@@ -60,10 +57,7 @@ int main(void)
 	  
       case READ:
 	puts("How many bytes do you want to read ?");
-	scanf("%d",  &read_size);
-	str = (char*) malloc((size_t)((read_size * 50) * sizeof(char)));
-	str [read_size] = '\0';
-	
+	scanf("%zu",  &num_of_bytes);
 	
 	fr = fopen("/dev/fifo", "w");
 	if(fr == NULL)
@@ -72,14 +66,14 @@ int main(void)
 	    return -1;
 	  }
 	
-	fprintf(fr,"num=%d\n",read_size);
-	//printf("read_size: %d", read_size);
+	fprintf(fr,"num=%zu\n",num_of_bytes);
 
 	if(fclose(fr))
 	  {
 	    printf("Closing /dev/fifo error\n");
 	    return -1;
 	  }
+	num_of_bytes *= 25;
 	
 	fr = fopen("/dev/fifo", "r");
 	if(fr == NULL)
@@ -87,10 +81,10 @@ int main(void)
 	    puts("Error while writing n");
 	    return -1;
 	  }
-	num_of_bytes = 300;
+	
 	getline(&str, &num_of_bytes, fr);
-	printf("\n%s", str);
-
+	printf("%s", str);
+	
 	if(fclose(fr))
 	  {
 	    printf("Closing /dev/fifo error\n");
