@@ -72,8 +72,8 @@ int main(void)
 	    return -1;
 	  }
 	
-	fprintf(fr,"num=%d",read_size);
-	printf("read_size: %d", read_size);
+	fprintf(fr,"num=%d\n",read_size);
+	//printf("read_size: %d", read_size);
 
 	if(fclose(fr))
 	  {
@@ -89,7 +89,7 @@ int main(void)
 	  }
 	num_of_bytes = 300;
 	getline(&str, &num_of_bytes, fr);
-	printf("\n %s", str);
+	printf("\n%s", str);
 
 	if(fclose(fr))
 	  {

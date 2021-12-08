@@ -90,7 +90,7 @@ ssize_t fifo_read(struct file *pfile, char __user *buffer, size_t length, loff_t
 	//read while readable_amount > 0
 	if(readable_amount > 0)
 	  {
-	    len = scnprintf(buff, BUFF_SIZE, "Value %d at position  %d\n", fifo[read_pos], read_pos);
+	    len = scnprintf(buff, BUFF_SIZE, "Value %d at position  %d; ", fifo[read_pos], read_pos);
 	    printk(KERN_INFO "Value %d at position %d\n", fifo[read_pos], read_pos);
 		
 	    ret = copy_to_user(buffer, buff, len);
